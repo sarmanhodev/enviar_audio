@@ -40,7 +40,14 @@ $(document).ready(function () {
         <button class="btn btn-outline-primary" type="button" id="btnEnviarZap"><i class="fa-solid fa-paper-plane"></i></button>
         </div>`;
 
+        let btnCancelarEnvio = `<button type="button" class="btn btn-warning btnGrupos ms-3" title="Cancelar envio" id="cancelarEnvio"><i class="fa-solid fa-ban"></i></button>`;
+
+        $("#btnCompartilhar").remove();
+        $(".btn-group").html(btnCancelarEnvio);
+
         $("#divDFlex").after(inputEnviar);
+
+
     });
 
     $("body").on("click", "#btnEnviarZap", function () {
@@ -53,6 +60,14 @@ $(document).ready(function () {
 
 
     $("body").on("click", "#cancelarEnvio", function () {
+        let btnCompartilhar = `<button type="button" class="btn btn-success btnGrupos" id="btnCompartilhar"><i class="fa-brands fa-whatsapp"></i></button>`;
+
+        $("#cancelarEnvio").remove();
+        $(".btn-group").html(btnCompartilhar);
         $("#divInputEnviarZap").remove();
+    });
+
+    $("body").on("click", "#btnExcluirAudio", function(){
+        excluirAudio();
     });
 });
