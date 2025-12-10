@@ -18,7 +18,7 @@ function getText(texto, voice) {
 
                 let htmlAudio = `<div class="d-flex flex-row justify-content-center mt-3" id="divDFlex">
                         <audio controls>
-                            <source src="/audio/audio.wav" type="audio/wav">
+                            <source src="/audio/audio.mp3" type="audio/mp3">
                             Seu navegador não suporta áudio.
                         </audio>
                         <div class="btn-group ms-3" role="group" aria-label="Basic example">
@@ -60,7 +60,7 @@ function getText(texto, voice) {
 
 
 function enviarWhatsApp(numero) {
-    let audio = "/audio/audio.wav";  // ou retornado pela API
+    let audio = "/audio/audio.mp3";  // ou retornado pela API
     let texto = `Olá! Aqui está seu áudio: ${window.location.origin}${audio}`;
     let url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
