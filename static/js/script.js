@@ -46,7 +46,7 @@ $(document).ready(function () {
                 pattern="[0-9]*"
                 maxlength="11">
         
-            <button class="btn btn-outline-primary" type="button" id="btnEnviarZap"><i class="fa-solid fa-paper-plane"></i></button>        
+            <button class="btn btn-outline-primary" disabled type="button" id="btnEnviarZap"><i class="fa-solid fa-paper-plane"></i></button>        
             </div>
             <small class="text-muted">Somente números: <b>21999999999</b></small>
         </div>`;
@@ -61,6 +61,17 @@ $(document).ready(function () {
 
     });
 
+
+    $("body").on("keyup", "#numeroWhatsapp", function () {
+        let numeroWhatsapp = $(this).val();
+
+        if (numeroWhatsapp.length == 11) {
+            $("#btnEnviarZap").prop('disabled', false);
+        } else {
+            $("#btnEnviarZap").prop('disabled', true);
+        }
+    });
+
     $("body").on("click", "#btnEnviarZap", function () {
         let numeroWhatsapp = $("#numeroWhatsapp").val();
 
@@ -71,15 +82,18 @@ $(document).ready(function () {
 
 
     $("body").on("click", "#cancelarEnvio", function () {
-        let btnCompartilhar = `<button type="button" class="btn btn-success btnGrupos" id="btnCompartilhar"><i class="fa-brands fa-whatsapp"></i></button>
-        <button type="button" class="btn btn-danger btnGrupos ms-3" title="Excluir áudio" id="btnExcluirAudio"><i class="fa-solid fa-trash-can"></i></button>`;
+        let audioURL = $("audio source").attr("src");
+        let filename = $("audio source").attr("data-filename");
+        
+        let btnCompartilhar = `<button type="button" data-url="${audioURL}" class="btn btn-success btnGrupos" id="btnCompartilhar"><i class="fa-brands fa-whatsapp"></i></button>
+        <button type="button" class="btn btn-danger ms-3 btnGrupos" data-filename="${filename}" title="Excluir áudio" id="btnExcluirAudio"><i class="fa-solid fa-trash-can"></i></button>`;
 
         $("#cancelarEnvio").remove();
         $(".btn-group").html(btnCompartilhar);
         $("#divInputEnviarZap").remove();
     });
 
-    $("body").on("click", "#btnExcluirAudio", function(){
+    $("body").on("click", "#btnExcluirAudio", function () {
         excluirAudio();
     });
 });
