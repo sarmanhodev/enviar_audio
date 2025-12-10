@@ -1,0 +1,75 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f7f7f7;
+}
+
+.container {
+    max-width: 600px;
+}
+
+h1 {
+    font-weight: 600;
+    color: #2C3E50;
+}
+
+.lead {
+    font-weight: 500;
+    color: #7F8C8D;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 30px;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.form-control {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info {
+    background-color: #eaf2f8;
+    color: #2980b9;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+label {
+    font-weight: 500;
+    color: #2C3E50;
+}
+
+textarea.form-control {
+    resize: none;
+}
+
+/* Add some space to the bottom of the page */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-weight: 400;
+    color: #7F8C8D;
+}
+
+
+
+.btnGrupos {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4),
+                0 7px 13px -3px rgba(0,0,0,0.3),
+                0 -3px 0 inset rgba(0,0,0,0.2);
+}
