@@ -107,5 +107,8 @@ function enviarWhatsApp(numero) {
     let url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
 
+    $("#divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
+
+
