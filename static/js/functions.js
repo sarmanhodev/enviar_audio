@@ -110,6 +110,3 @@ function enviarWhatsApp(numero) {
     $("#divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
-
-
-
