@@ -11,6 +11,7 @@ AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 
+
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
 # ---------------------------------------------------------
@@ -119,3 +120,4 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
