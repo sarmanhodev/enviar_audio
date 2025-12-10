@@ -1,6 +1,9 @@
 from flask import *
 from gtts import gTTS
 import time
+import logging
+import urllib.request
+import urllib.parse
 import os
 
 app = Flask(__name__)
@@ -13,43 +16,93 @@ AUDIO_DIR = "audio"
 def text_to_speech(text):
     path = "audio/audio.mp3"
     
+    # Garantir que o diretório existe
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    
     # Remove arquivo anterior
     try:
         if os.path.exists(path):
             os.remove(path)
-    except:
-        pass
+    except Exception as e:
+        logging.warning(f"Erro ao remover arquivo anterior: {e}")
     
+    # PRIMEIRA TENTATIVA: Versão simplificada (compatível com Render)
     try:
-        import requests
-        from gtts import gTTS
-        
-        # Criar uma sessão customizada
-        session = requests.Session()
-        session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        })
-        
-        # Criar o objeto gTTS com a sessão customizada
-        tts = gTTS(
-            text=text, 
-            lang="pt", 
-            slow=False,
-            session=session  # Passar a sessão diretamente
-        )
-        
-        # Salvar o arquivo
+        tts = gTTS(text=text, lang="pt", slow=False)
         tts.save(path)
+        return path
         
     except Exception as e:
-        # Fallback: tentar sem sessão customizada
+        logging.error(f"Primeira tentativa falhou: {e}")
+        
+        # SEGUNDA TENTATIVA: Usar método alternativo sem session
         try:
-            tts = gTTS(text=text, lang="pt", slow=False)
+            # Versão usando apenas o gTTS básico
+            tts = gTTS(text=text, lang="pt")
             tts.save(path)
-        except Exception as fallback_error:
-            raise Exception(f"Falha principal: {str(e)}, Fallback também falhou: {str(fallback_error)}")
-    
-    return path
+            return path
+            
+        except Exception as e2:
+            logging.error(f"Segunda tentativa falhou: {e2}")
+            
+            # TERCEIRA TENTATIVA: Download direto do Google TTS
+            try:
+                # Formata o texto para URL
+                import urllib.parse
+                text_encoded = urllib.parse.quote(text)
+                
+                # URL do Google TTS
+                url = f"https://translate.google.com/translate_tts?ie=UTF-8&q={text_encoded}&tl=pt-BR&client=tw-ob"
+                
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+                
+                response = requests.get(url, headers=headers, timeout=30)
+                
+                if response.status_code == 200:
+                    with open(path, 'wb') as f:
+                        f.write(response.content)
+                    return path
+                else:
+                    raise Exception(f"Google TTS retornou status: {response.status_code}")
+                    
+            except Exception as e3:
+                logging.error(f"Terceira tentativa falhou: {e3}")
+                
+                # ÚLTIMA TENTATIVA: Gerar áudio offline (se pyttsx3 estiver instalado)
+                try:
+                    return generate_audio_offline(text, path)
+                except:
+                    raise Exception(f"Todas as tentativas falharam. Último erro: {e3}")
+
+def generate_audio_offline(text, path):
+    """Fallback offline usando pyttsx3 se disponível"""
+    try:
+        import pyttsx3
+        
+        engine = pyttsx3.init()
+        
+        # Configurações para português
+        voices = engine.getProperty('voices')
+        for voice in voices:
+            if 'portuguese' in voice.name.lower() or 'português' in voice.name.lower():
+                engine.setProperty('voice', voice.id)
+                break
+        
+        engine.setProperty('rate', 150)
+        engine.setProperty('volume', 1.0)
+        
+        # Salvar em arquivo
+        engine.save_to_file(text, path)
+        engine.runAndWait()
+        
+        return path
+        
+    except ImportError:
+        raise Exception("pyttsx3 não está instalado. Adicione ao requirements.txt")
+    except Exception as e:
+        raise Exception(f"Erro no pyttsx3: {e}")
 
 
 @app.route("/home", methods=["GET", "POST"])
@@ -96,3 +149,4 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
