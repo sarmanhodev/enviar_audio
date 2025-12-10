@@ -35,9 +35,20 @@ $(document).ready(function () {
 
 
     $("body").on("click", "#btnCompartilhar", function () {
-        let inputEnviar = `<div class="input-group mt-3" id="divInputEnviarZap">
-        <input type="text" class="form-control" placeholder="Ex.: 21999999999" id="numeroWhatsapp" aria-label="Ex.: 21999999999" aria-describedby="btnEnviarZap">
-        <button class="btn btn-outline-primary" type="button" id="btnEnviarZap"><i class="fa-solid fa-paper-plane"></i></button>
+        let inputEnviar = `<div class="mt-3" id="divInputEnviarZap">
+            <div class="input-group">
+                <input type="tel" 
+                class="form-control" 
+                placeholder="Ex.: 21999999999" 
+                id="numeroWhatsapp" 
+                aria-label="Telefone"
+                inputmode="numeric" 
+                pattern="[0-9]*"
+                maxlength="11">
+        
+            <button class="btn btn-outline-primary" type="button" id="btnEnviarZap"><i class="fa-solid fa-paper-plane"></i></button>        
+            </div>
+            <small class="text-muted">Somente números: <b>21999999999</b></small>
         </div>`;
 
         let btnCancelarEnvio = `<button type="button" class="btn btn-warning btnGrupos ms-3" title="Cancelar envio" id="cancelarEnvio"><i class="fa-solid fa-ban"></i></button>`;
