@@ -39,7 +39,7 @@ def text_to_speech(text):
         except Exception as fallback_error:
             raise Exception(f"Erro: {e}. Fallback falhou: {fallback_error}")
 
-    return filename
+    return path
 
 
 
@@ -121,5 +121,6 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
