@@ -1,108 +1,45 @@
 from flask import *
 from gtts import gTTS
 import time
-import logging
-import urllib.request
-import urllib.parse
 import os
+import uuid
+import requests
 
 app = Flask(__name__)
 
 AUDIO_DIR = "audio"
+os.makedirs(AUDIO_DIR, exist_ok=True)
 
-# # Configura proxy da rede (caso necessário)
 
-# Gera arquivo MP3 usando gTTS
+# ---------------------------------------------------------
+# 🔊 Gera arquivo MP3 com nome único usando UUID
+# ---------------------------------------------------------
 def text_to_speech(text):
-    path = "audio/audio.mp3"
-    
-    # Garantir que o diretório existe
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    
-    # Remove arquivo anterior
     try:
-        if os.path.exists(path):
-            os.remove(path)
-    except Exception as e:
-        logging.warning(f"Erro ao remover arquivo anterior: {e}")
-    
-    # PRIMEIRA TENTATIVA: Versão simplificada (compatível com Render)
-    try:
-        tts = gTTS(text=text, lang="pt", slow=False)
-        tts.save(path)
-        return path
-        
-    except Exception as e:
-        logging.error(f"Primeira tentativa falhou: {e}")
-        
-        # SEGUNDA TENTATIVA: Usar método alternativo sem session
-        try:
-            # Versão usando apenas o gTTS básico
-            tts = gTTS(text=text, lang="pt")
-            tts.save(path)
-            return path
-            
-        except Exception as e2:
-            logging.error(f"Segunda tentativa falhou: {e2}")
-            
-            # TERCEIRA TENTATIVA: Download direto do Google TTS
-            try:
-                # Formata o texto para URL
-                import urllib.parse
-                text_encoded = urllib.parse.quote(text)
-                
-                # URL do Google TTS
-                url = f"https://translate.google.com/translate_tts?ie=UTF-8&q={text_encoded}&tl=pt-BR&client=tw-ob"
-                
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-                
-                response = requests.get(url, headers=headers, timeout=30)
-                
-                if response.status_code == 200:
-                    with open(path, 'wb') as f:
-                        f.write(response.content)
-                    return path
-                else:
-                    raise Exception(f"Google TTS retornou status: {response.status_code}")
-                    
-            except Exception as e3:
-                logging.error(f"Terceira tentativa falhou: {e3}")
-                
-                # ÚLTIMA TENTATIVA: Gerar áudio offline (se pyttsx3 estiver instalado)
-                try:
-                    return generate_audio_offline(text, path)
-                except:
-                    raise Exception(f"Todas as tentativas falharam. Último erro: {e3}")
+        # Gera nome único para o arquivo
+        filename = f"{uuid.uuid4().hex}.mp3"
+        path = os.path.join(AUDIO_DIR, filename)
 
-def generate_audio_offline(text, path):
-    """Fallback offline usando pyttsx3 se disponível"""
-    try:
-        import pyttsx3
-        
-        engine = pyttsx3.init()
-        
-        # Configurações para português
-        voices = engine.getProperty('voices')
-        for voice in voices:
-            if 'portuguese' in voice.name.lower() or 'português' in voice.name.lower():
-                engine.setProperty('voice', voice.id)
-                break
-        
-        engine.setProperty('rate', 150)
-        engine.setProperty('volume', 1.0)
-        
-        # Salvar em arquivo
-        engine.save_to_file(text, path)
-        engine.runAndWait()
-        
-        return path
-        
-    except ImportError:
-        raise Exception("pyttsx3 não está instalado. Adicione ao requirements.txt")
+        # Criar uma sessão customizada
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        })
+
+        # Converte o texto em áudio
+        tts = gTTS(text=text, lang="pt", slow=False, session=session)
+        tts.save(path)
+
+        return filename
+
     except Exception as e:
-        raise Exception(f"Erro no pyttsx3: {e}")
+        # Fallback: tentar sem sessão customizada
+        try:
+            tts = gTTS(text=text, lang="pt", slow=False)
+            tts.save(path)
+        except Exception as fallback_error:
+            raise Exception(f"Falha principal: {str(e)}, Fallback também falhou: {str(fallback_error)}")
+
 
 
 @app.route("/home", methods=["GET", "POST"])
@@ -114,6 +51,9 @@ def home():
     return render_template("home.html", voices=[], audio_files=audio_files)
 
 
+# ---------------------------------------------------------
+# 🔥 POST: Converter texto → áudio
+# ---------------------------------------------------------
 @app.route("/getText", methods=["GET", "POST"])
 def getText():
     if request.method == 'POST':
@@ -121,18 +61,20 @@ def getText():
             dados = request.get_json()
             texto = dados[0].get('texto')
 
-            # Validação
             if not texto:
                 return jsonify({"status": 400, "message": "Texto não pode estar vazio."}), 400
 
-            # Converte texto → áudio
-            path = text_to_speech(texto)
+            # Converte texto em áudio com nome exclusivo
+            filename = text_to_speech(texto)
 
-            print("Texto convertido com sucesso!")
+            # (Opcional) Limpeza automática
+            # limpar_audios_antigos()
+
             return jsonify({
                 "status": 200,
                 "message": "Texto convertido com sucesso.",
-                "audio_url": "/audio/audio.mp3"
+                "audio_url": f"/{filename}",
+                "filename": filename
             }), 200
 
         except Exception as e:
@@ -142,37 +84,38 @@ def getText():
     return jsonify({"status": 405, "message": "Método não permitido."}), 405
 
 
-
-@app.route("/excluir_audio", methods=["GET", "POST"])
+# ---------------------------------------------------------
+# 🗑️ POST: Excluir áudio específico
+# ---------------------------------------------------------
+@app.route("/excluir_audio", methods=["POST"])
 def excluir_audio():
-    if request.method == 'POST':
+    try:
         dados = request.get_json()
-        excluir = dados[0].get('excluir')
-        path = "audio/audio.mp3"
+        filename = dados[0].get("filename")
 
-        try:
-            if excluir:
-                if os.path.exists(path):
-                    os.remove(path)
+        if not filename:
+            return jsonify({"status": 400, "message": "Arquivo não informado."}), 400
 
-                return jsonify({"status": 200, "message": "Áudio excluído com sucesso!."}), 200
+        path = os.path.join(filename)
 
-        except (KeyError, TypeError) as e:
-            print("Erro nos dados recebidos:", str(e))
-            return jsonify({"status": 500, "message": "Erro ao excluir o áudio."}), 500
-        
-        except Exception as e:
-            print("Erro inesperado:", str(e))
-            return jsonify({"status": 500, "message": "Erro interno do servidor."}), 500
-            
+        if os.path.exists(path):
+            os.remove(path)
+            return jsonify({"status": 200, "message": "Áudio excluído com sucesso!"}), 200
+        else:
+            return jsonify({"status": 404, "message": "Arquivo não encontrado."}), 404
 
+    except Exception as e:
+        print("Erro inesperado:", str(e))
+        return jsonify({"status": 500, "message": "Erro interno do servidor."}), 500
+    
 
+# ---------------------------------------------------------
+# 🎵 Rota pública para servir áudios
+# ---------------------------------------------------------
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
-    return send_from_directory('audio', filename)
+    return send_from_directory(AUDIO_DIR, filename)
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
