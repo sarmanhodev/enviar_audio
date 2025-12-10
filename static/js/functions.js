@@ -37,7 +37,7 @@ function getText(texto, voice) {
                     <div class="d-flex flex-row justify-content-center mt-3" id="divDFlex">
 
                         <audio controls>
-                            <source src="${audioUrl}" type="audio/mp3">
+                            <source src="${audioUrl}"  data-filename="${filename}" type="audio/mp3">
                             Seu navegador não suporta áudio.
                         </audio>
 
@@ -76,7 +76,7 @@ function getText(texto, voice) {
 function excluirAudio() {
 
     // Recupera o nome do arquivo armazenado no botão
-    let filename = $("#btnExcluirAudio").data("filename");
+    let filename = $("#btnExcluirAudio").attr("data-filename");
 
     if (!filename) {
         console.error("Nenhum filename encontrado para exclusão.");
@@ -125,11 +125,24 @@ function excluirAudio() {
 
 
 function enviarWhatsApp(numero) {
-    let audio = "/audio/audio.mp3";  // ou retornado pela API
-    let texto = `Olá! Aqui está seu áudio: ${window.location.origin}${audio}`;
+    // pega exatamente o nome salvo no botão
+    let audio = $("audio source").attr("src");
+
+    if (!audio) {
+        console.error("Arquivo de áudio não encontrado!");
+        return;
+    }
+
+    // garante que tem / no caminho
+    let audioUrl = `${window.location.origin}${audio.startsWith("/") ? "" : "/"}${audio}`;
+
+    let texto = `Olá! Aqui está seu áudio: ${audioUrl}`;
     let url = `https://api.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(texto)}`;
+
+    console.log("Enviando para WhatsApp:", url);
     window.open(url, "_blank");
 
     $("#divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
+
