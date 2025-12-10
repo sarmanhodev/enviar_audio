@@ -30,21 +30,13 @@
                         <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
                     </div>
 
-                    <!-- <div class="form-group mt-3">
-                        <label for="voice">Selecione uma Voz:</label>
-                        <select name="voice" id="voice" class="form-select">
-                            {% for voice in voices %}
-                            <option value="{{ loop.index0 }}">{{ voice.name }} ({{ voice.languages[0] }})</option>
-                            {% endfor %}
-                        </select>
-                    </div> -->
 
                     <div class="row mt-3">
                         <button disabled type="button" id="btnConverter" class="btn btn-primary btn-block mt-3">
                             <i class="fa-solid fa-retweet"></i> Converter</button>
                     </div>
 
-                    <div id="divAlert" class="alert alert-dismissible fade show" role="alert" hidden>
+                    <div id="divAlert" class="alert alert-dismissible fade show mt-3" role="alert" hidden>
                         <span id="textMessage"><strong></strong></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -65,3 +57,4 @@
 </body>
 
 </html>
+
