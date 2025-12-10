@@ -16,30 +16,31 @@ os.makedirs(AUDIO_DIR, exist_ok=True)
 # 🔊 Gera arquivo MP3 com nome único usando UUID
 # ---------------------------------------------------------
 def text_to_speech(text):
-    try:
-        # Gera nome único para o arquivo
-        filename = f"{uuid.uuid4().hex}.mp3"
-        path = os.path.join(AUDIO_DIR, filename)
+    # Sempre cria o nome antes
+    filename = f"{uuid.uuid4().hex}.mp3"
+    path = os.path.join(AUDIO_DIR, filename)
 
-        # Criar uma sessão customizada
+    try:
+        # Sessão customizada
         session = requests.Session()
         session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 ...'
         })
 
-        # Converte o texto em áudio
         tts = gTTS(text=text, lang="pt", slow=False, session=session)
         tts.save(path)
 
-        return filename
-
     except Exception as e:
-        # Fallback: tentar sem sessão customizada
+        # Fallback (sem session)
         try:
             tts = gTTS(text=text, lang="pt", slow=False)
             tts.save(path)
+
         except Exception as fallback_error:
-            raise Exception(f"Falha principal: {str(e)}, Fallback também falhou: {str(fallback_error)}")
+            raise Exception(f"Erro: {e}. Fallback falhou: {fallback_error}")
+
+    return filename
+
 
 
 
@@ -120,4 +121,5 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
