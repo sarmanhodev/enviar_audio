@@ -142,6 +142,31 @@ def getText():
     return jsonify({"status": 405, "message": "Método não permitido."}), 405
 
 
+
+@app.route("/excluir_audio", methods=["GET", "POST"])
+def excluir_audio():
+    if request.method == 'POST':
+        dados = request.get_json()
+        excluir = dados[0].get('excluir')
+        path = "audio/audio.mp3"
+
+        try:
+            if excluir:
+                if os.path.exists(path):
+                    os.remove(path)
+
+                return jsonify({"status": 200, "message": "Áudio excluído com sucesso!."}), 200
+
+        except (KeyError, TypeError) as e:
+            print("Erro nos dados recebidos:", str(e))
+            return jsonify({"status": 500, "message": "Erro ao excluir o áudio."}), 500
+        
+        except Exception as e:
+            print("Erro inesperado:", str(e))
+            return jsonify({"status": 500, "message": "Erro interno do servidor."}), 500
+            
+
+
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
     return send_from_directory('audio', filename)
@@ -149,4 +174,5 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
