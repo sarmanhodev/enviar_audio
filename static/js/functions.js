@@ -104,11 +104,12 @@ function excluirAudio() {
 function enviarWhatsApp(numero) {
     let audio = "/audio/audio.mp3";  // ou retornado pela API
     let texto = `Olá! Aqui está seu áudio: ${window.location.origin}${audio}`;
-    let url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(texto)}`;
+    let url = `https://api.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(texto)}`;
     window.open(url, "_blank");
 
     $("#divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
+
 
 
