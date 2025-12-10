@@ -71,7 +71,8 @@ $(document).ready(function () {
 
 
     $("body").on("click", "#cancelarEnvio", function () {
-        let btnCompartilhar = `<button type="button" class="btn btn-success btnGrupos" id="btnCompartilhar"><i class="fa-brands fa-whatsapp"></i></button>`;
+        let btnCompartilhar = `<button type="button" class="btn btn-success btnGrupos" id="btnCompartilhar"><i class="fa-brands fa-whatsapp"></i></button>
+        <button type="button" class="btn btn-danger btnGrupos ms-3" title="Excluir áudio" id="btnExcluirAudio"><i class="fa-solid fa-trash-can"></i></button>`;
 
         $("#cancelarEnvio").remove();
         $(".btn-group").html(btnCompartilhar);
