@@ -16,32 +16,41 @@ os.makedirs(AUDIO_DIR, exist_ok=True)
 # 🔊 Gera arquivo MP3 com nome único usando UUID
 # ---------------------------------------------------------
 def text_to_speech(text):
-        # Pasta temporária para gerar áudio localmente antes do upload
+    """
+    Gera arquivo de áudio localmente e retorna o nome do arquivo
+    (Mantém o comportamento original que funcionava)
+    """
+    try:
+        # Pasta temporária para gerar áudio localmente
         TMP_AUDIO_DIR = "tmp_audio"
         os.makedirs(TMP_AUDIO_DIR, exist_ok=True)
-
+        
         # Gera nome único para o arquivo
         filename = f"{uuid.uuid4().hex}.mp3"
-        tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
+        tmp_path = os.path.join(TMP_AUDIO_DIR, filename)
 
-
-        tts = gTTS(text=text, lang="pt", tld="com", slow=False)
-        tts.save(tmp_path)
-
+        # Tentar com sessão customizada (como funcionava antes)
         try:
-           public_url = upload_audio(tmp_path, filename)
-        except Exception as e:
-            raise Exception(f"Erro ao enviar para Supabase: {str(e)}")
-        finally:
-            # Limpar arquivo local temporário
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
-
-        # -------------------------------
-        # 3️⃣ Retornar link público
-        # -------------------------------
-        public_url = supabase.storage.from_('audios').get_public_url(filename)
-        return public_url
+            session = requests.Session()
+            session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            })
+            
+            tts = gTTS(text=text, lang="pt", slow=False, session=session)
+            tts.save(tmp_path)
+            
+        except Exception as session_error:
+            # Fallback: tentar sem sessão customizada
+            print(f"Usando fallback (sem sessão): {str(session_error)}")
+            tts = gTTS(text=text, lang="pt", slow=False)
+            tts.save(tmp_path)
+        
+        print(f"Áudio gerado com sucesso: {filename}")
+        return filename
+        
+    except Exception as e:
+        print(f"Erro crítico no text_to_speech: {str(e)}")
+        raise Exception(f"Falha ao gerar áudio: {str(e)}")
 
 
 
@@ -67,20 +76,36 @@ def getText():
             if not texto:
                 return jsonify({"status": 400, "message": "Texto não pode estar vazio."}), 400
 
-            # Converte texto em áudio com nome exclusivo
+            # 1. Converte texto em áudio (retorna apenas o nome do arquivo)
             filename = text_to_speech(texto)
-
+            
+            # 2. Fazer upload para o Supabase SEPARADAMENTE
+            try:
+                tmp_path = os.path.join("tmp_audio", filename)
+                public_url = upload_audio(tmp_path, filename)
+            except Exception as upload_error:
+                raise Exception(f"Erro no upload: {str(upload_error)}")
+            finally:
+                # Limpar arquivo local
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                    print(f"Arquivo temporário removido: {tmp_path}")
 
             return jsonify({
                 "status": 200,
                 "message": "Texto convertido com sucesso.",
                 "texto_original": texto,
-                "audio_url": filename
+                "audio_url": public_url,
+                "filename": filename
             }), 200
 
         except Exception as e:
-            print("Erro inesperado:", str(e))
-            return jsonify({"status": 500, "message": "Erro interno do servidor.","erro":str(e)}), 500
+            print("Erro completo no endpoint:", str(e))
+            return jsonify({
+                "status": 500, 
+                "message": "Erro interno do servidor.",
+                "erro": str(e)
+            }), 500
 
     return jsonify({"status": 405, "message": "Método não permitido."}), 405
 
@@ -124,6 +149,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
