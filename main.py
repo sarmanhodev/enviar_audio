@@ -11,18 +11,6 @@ app = Flask(__name__)
 AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
-ORIGINAL_REQUEST = requests.sessions.Session.request
-
-def patched_request(self, method, url, **kwargs):
-    headers = kwargs.pop("headers", {})
-    headers["User-Agent"] = (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    )
-    return ORIGINAL_REQUEST(self, method, url, headers=headers, **kwargs)
-
-requests.sessions.Session.request = patched_request
 
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
@@ -37,7 +25,7 @@ def text_to_speech(text):
         tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
 
 
-        tts = gTTS(text=text, lang="pt", tld="com.br", slow=False)
+        tts = gTTS(text=text, lang="pt", slow=False)
         tts.save(tmp_path)
 
         try:
@@ -92,7 +80,7 @@ def getText():
 
         except Exception as e:
             print("Erro inesperado:", str(e))
-            return jsonify({"status": 500, "message": "Erro interno do servidor."}), 500
+            return jsonify({"status": 500, "message": "Erro interno do servidor.", str(e)}), 500
 
     return jsonify({"status": 405, "message": "Método não permitido."}), 405
 
@@ -136,6 +124,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
