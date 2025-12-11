@@ -11,7 +11,6 @@ function getText(texto, voice) {
         dataType: 'json',
         data: JSON.stringify(dados),
         success: function (result) {
-
             if (result.status === 200) {
 
                 // Mensagens / UI
@@ -27,14 +26,19 @@ function getText(texto, voice) {
                                   .html('<i class="fa-solid fa-retweet"></i> Converter');
 
                 // Remove player anterior
-                $("#divDFlex").remove();
+                $(".divDFlex").remove();
 
-                // NOVA URL única
-                let audioUrl = result.audio_url;
-                let filename = result.filename;
+                // NOVA URL única direto do Supabase
+                let audioUrl = result.audio_url; // <-- link público do Supabase
+                let filename = audioUrl.split('/').pop(); // pega somente o nome do arquivo
+                let textoOriginal = result.texto_original;
 
                 let htmlAudio = `
-                    <div class="d-flex flex-row justify-content-center mt-3" id="divDFlex">
+                    <div class="d-flex flex-row justify-content-center mt-3 divDFlex">
+                        <span><b>Texto original:</b> <span class="fst-italic">"${textoOriginal}"</span></span>
+                    </div>
+
+                    <div class="d-flex flex-row justify-content-center mt-2 divDFlex" id="divAudioTag">
 
                         <audio controls>
                             <source src="${audioUrl}"  data-filename="${filename}" type="audio/mp3">
@@ -72,10 +76,7 @@ function getText(texto, voice) {
 }
 
 
-
 function excluirAudio() {
-
-    // Recupera o nome do arquivo armazenado no botão
     let filename = $("#btnExcluirAudio").attr("data-filename");
 
     if (!filename) {
@@ -101,9 +102,7 @@ function excluirAudio() {
                     .prop('hidden', false);
 
                 $("#textMessage").text(message);
-
-                // Remove o player e os botões
-                $("#divDFlex").remove();
+                $(".divDFlex").remove();
 
                 setTimeout(() => {
                     $("#divAlert").prop('hidden', true);
@@ -123,27 +122,20 @@ function excluirAudio() {
 }
 
 
+function enviarWhatsApp(numero, filename) {
+    // Pega o link público do Supabase
+    let audioUrl = `${window.location.origin}/audio/${filename}`;
 
-function enviarWhatsApp(numero) {
-    // pega exatamente o nome salvo no botão
-    let audio = $("audio source").attr("src");
-
-    if (!audio) {
-        console.error("Arquivo de áudio não encontrado!");
+    if (!audioUrl) {
+        console.error("Link de áudio não encontrado!");
         return;
     }
-
-    // garante que tem / no caminho
-    let audioUrl = `${window.location.origin}${audio.startsWith("/") ? "" : "/"}${audio}`;
 
     let texto = `Olá! Aqui está seu áudio: ${audioUrl}`;
     let url = `https://api.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(texto)}`;
 
-    
     window.open(url, "_blank");
 
-    $("#divDFlex").remove();
+    $(".divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
-
-
