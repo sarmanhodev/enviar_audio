@@ -11,15 +11,18 @@ app = Flask(__name__)
 AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
-def requests_default_headers():
-    return {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
-    }
+ORIGINAL_REQUEST = requests.sessions.Session.request
 
-requests.utils.default_headers = requests_default_headers
+def patched_request(self, method, url, **kwargs):
+    headers = kwargs.pop("headers", {})
+    headers["User-Agent"] = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+    return ORIGINAL_REQUEST(self, method, url, headers=headers, **kwargs)
+
+requests.sessions.Session.request = patched_request
 
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
@@ -133,6 +136,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
