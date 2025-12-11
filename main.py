@@ -80,7 +80,7 @@ def getText():
 
         except Exception as e:
             print("Erro inesperado:", str(e))
-            return jsonify({"status": 500, "message": "Erro interno do servidor.", str(e)}), 500
+            return jsonify({"status": 500, "message": "Erro interno do servidor.","erro":str(e)}), 500
 
     return jsonify({"status": 405, "message": "Método não permitido."}), 405
 
@@ -124,6 +124,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
