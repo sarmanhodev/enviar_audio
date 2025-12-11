@@ -21,14 +21,17 @@ def text_to_speech(text):
     path = os.path.join(AUDIO_DIR, filename)
 
     try:
-        # Sessão customizada
+         # Criar uma sessão customizada
         session = requests.Session()
         session.headers.update({
-            'User-Agent': 'Mozilla/5.0 ...'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         })
 
+        # Converte o texto em áudio
         tts = gTTS(text=text, lang="pt", slow=False, session=session)
         tts.save(path)
+
+        return filename
 
     except Exception as e:
         # Fallback (sem session)
@@ -121,6 +124,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
