@@ -11,6 +11,15 @@ app = Flask(__name__)
 AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
+def requests_default_headers():
+    return {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+
+requests.utils.default_headers = requests_default_headers
 
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
@@ -25,13 +34,7 @@ def text_to_speech(text):
         tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
 
 
-        # Converte o texto em áudio
-        session = requests.Session()
-        session.headers.update({
-             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        })
-        tts = gTTS(text=text, lang="pt", slow=False, session=session)
+        tts = gTTS(text=text, lang="pt", tld="com.br", slow=False)
         tts.save(tmp_path)
 
         try:
@@ -76,8 +79,6 @@ def getText():
             # Converte texto em áudio com nome exclusivo
             filename = text_to_speech(texto)
 
-            # (Opcional) Limpeza automática
-            # limpar_audios_antigos()
 
             return jsonify({
                 "status": 200,
@@ -132,6 +133,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
