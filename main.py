@@ -12,12 +12,6 @@ AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 
-# Patch para garantir que o Google aceite a requisição em produção
-requests.utils.default_headers = lambda: {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
 # ---------------------------------------------------------
@@ -32,7 +26,12 @@ def text_to_speech(text):
 
 
         # Converte o texto em áudio
-        tts = gTTS(text=text, lang="pt", tld="com.br", slow=False)
+        session = requests.Session()
+        session.headers.update({
+             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        })
+        tts = gTTS(text, lang="pt", tld="com.br", session=session)
         tts.save(tmp_path)
 
         try:
@@ -133,4 +132,5 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
