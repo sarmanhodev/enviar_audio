@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Player de Áudio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-dark">
+
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div class="text-center">
+
+            <h4 class="mb-4 text-light">Seu áudio</h4>
+
+            <audio controls autoplay  style="width: 350px;">
+                <source src="{{ audio_url }}" type="audio/mp3">
+                Seu navegador não suporta áudio.
+            </audio>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
