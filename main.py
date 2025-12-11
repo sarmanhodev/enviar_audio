@@ -24,16 +24,12 @@ def text_to_speech(text):
         filename = f"{uuid.uuid4().hex}.mp3"
         tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
 
-        session = requests.Session()
-        session.headers.update({
-            'User-Agent': (
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                '(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            )
-        })
-
-        tts = gTTS(text=text, lang="pt", slow=False, session=session)
-        tts.save(tmp_path)
+        try:
+           # gTTS sem session (necessário em produção)
+           tts = gTTS(text=text, lang="pt", slow=False)
+           tts.save(tmp_path)
+        except Exception as e:
+           raise Exception(f"Erro ao gerar áudio com gTTS: {str(e)}")
 
         try:
            public_url = upload_audio(tmp_path, filename)
@@ -132,6 +128,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
