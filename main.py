@@ -33,8 +33,6 @@ def text_to_speech(text):
         })
 
         tts = gTTS(text=text, lang="pt", slow=False, session=session)
-       
-        tts = gTTS(text=text, lang="pt", slow=False)
         tts.save(tmp_path)
 
         try:
@@ -134,6 +132,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
