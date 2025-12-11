@@ -25,7 +25,7 @@ def text_to_speech(text):
         tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
 
 
-        tts = gTTS(text=text, lang="pt", slow=False)
+        tts = gTTS(text=text, lang="pt", tld="com", slow=False)
         tts.save(tmp_path)
 
         try:
@@ -124,6 +124,7 @@ def serve_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
