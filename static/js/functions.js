@@ -139,10 +139,11 @@ function enviarWhatsApp(numero) {
     let texto = `Olá! Aqui está seu áudio: ${audioUrl}`;
     let url = `https://api.whatsapp.com/send?phone=55${numero}&text=${encodeURIComponent(texto)}`;
 
-    console.log("Enviando para WhatsApp:", url);
+    
     window.open(url, "_blank");
 
     $("#divDFlex").remove();
     $("#divInputEnviarZap").remove();
 }
+
 
