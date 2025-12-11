@@ -4,6 +4,7 @@ import time
 import os
 import uuid
 import requests
+from conexao_supabase import *
 
 app = Flask(__name__)
 
@@ -11,39 +12,37 @@ AUDIO_DIR = "audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 
-
 # ---------------------------------------------------------
 # 🔊 Gera arquivo MP3 com nome único usando UUID
 # ---------------------------------------------------------
 def text_to_speech(text):
-    # Sempre cria o nome antes
-    filename = f"{uuid.uuid4().hex}.mp3"
-    path = os.path.join(AUDIO_DIR, filename)
+        # Pasta temporária para gerar áudio localmente antes do upload
+        TMP_AUDIO_DIR = "tmp_audio"
+        os.makedirs(TMP_AUDIO_DIR, exist_ok=True)
 
-    try:
-         # Criar uma sessão customizada
-        session = requests.Session()
-        session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        })
+        # Gera nome único para o arquivo
+        filename = f"{uuid.uuid4().hex}.mp3"
+        tmp_path  = os.path.join(TMP_AUDIO_DIR, filename)
+
 
         # Converte o texto em áudio
-        tts = gTTS(text=text, lang="pt", slow=False, session=session)
-        tts.save(path)
+        tts = gTTS(text=text, lang="pt", slow=False)
+        tts.save(tmp_path)
 
-        return filename
-
-    except Exception as e:
-        # Fallback (sem session)
         try:
-            tts = gTTS(text=text, lang="pt", slow=False)
-            tts.save(path)
+           public_url = upload_audio(tmp_path, filename)
+        except Exception as e:
+            raise Exception(f"Erro ao enviar para Supabase: {str(e)}")
+        finally:
+            # Limpar arquivo local temporário
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
-        except Exception as fallback_error:
-            raise Exception(f"Erro: {e}. Fallback falhou: {fallback_error}")
-
-    return path
-
+        # -------------------------------
+        # 3️⃣ Retornar link público
+        # -------------------------------
+        public_url = supabase.storage.from_('audios').get_public_url(filename)
+        return public_url
 
 
 
@@ -78,8 +77,8 @@ def getText():
             return jsonify({
                 "status": 200,
                 "message": "Texto convertido com sucesso.",
-                "audio_url": f"/{filename}",
-                "filename": filename
+                "texto_original": texto,
+                "audio_url": filename
             }), 200
 
         except Exception as e:
@@ -101,30 +100,30 @@ def excluir_audio():
         if not filename:
             return jsonify({"status": 400, "message": "Arquivo não informado."}), 400
 
-        path = os.path.join(filename)
+        # Remove arquivo do Supabase
+        try:
+            res = supabase.storage.from_("audios").remove([filename])
+            print("Supabase remove:", res)
+        except Exception as e:
+            print("Erro ao remover do Supabase:", e)
+            return jsonify({"status": 500, "message": "Erro ao excluir no Supabase."}), 500
 
-        if os.path.exists(path):
-            os.remove(path)
-            return jsonify({"status": 200, "message": "Áudio excluído com sucesso!"}), 200
-        else:
-            return jsonify({"status": 404, "message": "Arquivo não encontrado."}), 404
+        return jsonify({"status": 200, "message": "Áudio excluído com sucesso!"}), 200
 
     except Exception as e:
         print("Erro inesperado:", str(e))
         return jsonify({"status": 500, "message": "Erro interno do servidor."}), 500
+
     
 
 # ---------------------------------------------------------
 # 🎵 Rota pública para servir áudios
 # ---------------------------------------------------------
-@app.route('/audio/<path:filename>')
+@app.route('/audio/<filename>')
 def serve_audio(filename):
-    return send_from_directory(AUDIO_DIR, filename)
+    public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(filename)
+    return render_template("player.html", audio_url=public_url)
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
