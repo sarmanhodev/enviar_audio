@@ -3,7 +3,7 @@
 Aplicação web para converter texto em áudio (MP3) usando Python/Flask, gTTS e Supabase Storage.
 O sistema gera o áudio, envia automaticamente para um bucket no Supabase e retorna uma URL pública para download ou reprodução.
 
-📌 Funcionalidades
+#📌 Funcionalidades
 
 Conversão de texto em áudio (voz PT-BR)
 
@@ -17,7 +17,7 @@ Interface simples, moderna e responsiva
 
 Não armazena arquivos em disco (apenas temporariamente)
 
-🛠 Tecnologias Utilizadas
+#🛠 Tecnologias Utilizadas
 
 🔹 Backend
 
@@ -41,7 +41,7 @@ JavaScript + jQuery
 
 AJAX para comunicação com o backend
 
-🚀 Como Funciona o Processo
+#🚀 Como Funciona o Processo
 
 O usuário digita um texto na interface.
 
@@ -55,13 +55,13 @@ O Supabase retorna uma URL pública, que é enviada ao frontend.
 
 O usuário pode:
 
-Ouvir o áudio
+ouvir o áudio
 
-Baixar
+baixar
 
-Enviar via WhatsApp
+enviar via WhatsApp
 
-📦 Estrutura do Projeto
+#📦 Estrutura do Projeto
 .
 ├── main.py                    # Backend Flask
 ├── conexao_supabase.py        # Cliente e funções de upload/download
@@ -76,7 +76,7 @@ Enviar via WhatsApp
 │   └── index.html
 └── README.md
 
-🔊 Função Principal (geração + upload)
+#🔊 Função Principal (geração + upload)
 def text_to_speech(text):
     TMP_AUDIO_DIR = "tmp_audio"
     os.makedirs(TMP_AUDIO_DIR, exist_ok=True)
@@ -98,14 +98,14 @@ def text_to_speech(text):
 
     return public_url
 
-🌐 Função de Upload para o Supabase
+#🌐 Função de Upload para o Supabase
 def upload_audio(file_path: str, file_name: str) -> str:
     with open(file_path, "rb") as f:
         supabase.storage.from_("audios").upload(file_name, f)
 
     return supabase.storage.from_("audios").get_public_url(file_name)
 
-▶️ Como Rodar o Projeto Localmente
+#▶️ Como Rodar o Projeto Localmente
 1️⃣ Clonar o repositório
 git clone https://github.com/sarmanhodev/enviar_audio.git
 cd enviar_audio
@@ -121,7 +121,7 @@ SUPABASE_URL = "URL_DO_SEU_PROJETO"
 SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY"
 BUCKET_NAME = "audios"
 
-4️⃣ Rodar servidor
+#4️⃣ Rodar servidor
 python main.py
 
 
@@ -129,7 +129,7 @@ Aplicação disponível em:
 
 http://127.0.0.1:5000/home
 
-🌟 Como Usar
+#🌟 Como Usar
 
 Acesse a página no navegador.
 
@@ -147,11 +147,10 @@ baixar
 
 ou enviar via WhatsApp
 
-🧪 Endpoints da API (Opcional)
+#🧪 Endpoints da API (Opcional)
 Método	Rota	Descrição
 POST	/gerar_audio	Recebe texto e retorna URL pública do MP3
 GET	/download/<filename>	Faz download do arquivo (opcional)
-👨‍💻 Desenvolvido por
 
-Diego Sarmanho
+#👨‍💻 Desenvolvido por Diego Sarmanho
 🔗 GitHub: https://github.com/sarmanhodev
