@@ -1,11 +1,6 @@
 from supabase import create_client, Client
 import os
 
-# -------------------------------
-# Configura proxy da rede (opcional)
-# -------------------------------
-os.environ["HTTP_PROXY"] = "http://658823:con@nLuna2025@proxy.comlurb.rio.rj.gov.br:8080"
-os.environ["HTTPS_PROXY"] = "http://658823:con@nLuna2025@proxy.comlurb.rio.rj.gov.br:8080"
 
 # -------------------------------
 # Configurações Supabase
@@ -78,3 +73,4 @@ def listar_arquivos():
     
 #     # Download
 #     download_audio("audio1.mp3", "audio/baixado_audio1.mp3")
+
