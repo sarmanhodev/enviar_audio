@@ -1,4 +1,4 @@
-🗣️ Text-to-Speech Converter (Flask + gTTS + Supabase)
+# 🗣️ Text-to-Speech Converter (Flask + gTTS + Supabase)
 
 Aplicação web para converter texto em áudio (MP3) usando Python/Flask, gTTS e Supabase Storage.
 O sistema gera o áudio, envia automaticamente para um bucket no Supabase e retorna uma URL pública para download ou reprodução.
@@ -18,6 +18,7 @@ Interface simples, moderna e responsiva
 Não armazena arquivos em disco (apenas temporariamente)
 
 🛠 Tecnologias Utilizadas
+
 🔹 Backend
 
 Python 3
